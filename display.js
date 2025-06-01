@@ -1,1 +1,1 @@
-console.log("✅ display.js run ho gaya GitHub pe!");
+console.log("✅ display.js run ho gaya GitHub pe thanks !");
