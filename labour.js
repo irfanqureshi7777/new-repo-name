@@ -4,11 +4,14 @@ const { google } = require('googleapis');
 const fs = require('fs');
 
 const SHEET_ID = '1vi-z__fFdVhUZr3PEDjhM83kqhFtbJX0Ejcfu9M8RKo';
-const SHEET_RANGE = 'R6.09!A3';  // Adjust sheet and range as needed
+const SHEET_RANGE = 'R6.09!A3';  // Adjust as needed
 
 const NREGA_URL = 'https://nreganarep.nic.in/netnrega/dpc_sms_new.aspx?lflag=eng&page=b&Short_Name=MP&state_name=MADHYA+PRADESH&state_code=17&district_name=BALAGHAT&district_code=1738&block_name=KHAIRLANJI&block_code=1738002&fin_year=2025-2026&dt=&EDepartment=ALL&wrkcat=ALL&worktype=ALL&Digest=0Rg9WmyQmiHlGt6U8z1w4A';
 
+// Path to your Google service account JSON credentials file
 const CREDENTIALS_PATH = './credentials.json';
+
+// Google Sheets API scope
 const SCOPES = ['https://www.googleapis.com/auth/spreadsheets'];
 
 async function authorizeGoogleSheets() {
@@ -21,25 +24,23 @@ async function authorizeGoogleSheets() {
 
 async function scrapeNregaTable(url) {
   const browser = await puppeteer.launch({
-    headless: 'new',
-    args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage']
+    headless: 'new',                      // Use new headless mode
+    args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage'],
   });
+
   const page = await browser.newPage();
 
-  // Set user agent to reduce bot detection
+  // Set user-agent to reduce bot detection
   await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0 Safari/537.36');
 
   try {
     console.log(`Navigating to ${url} ...`);
-    await page.goto(url, { waitUntil: 'networkidle0', timeout: 0 });  // No timeout, wait for full load
+    await page.goto(url, { waitUntil: 'networkidle0', timeout: 0 }); // no timeout
 
-    // Extra wait to ensure dynamic content is loaded
+    // Wait a bit to ensure full content load
     await page.waitForTimeout(3000);
 
     const content = await page.content();
-
-    // Optional: save snapshot for debugging
-    // await page.screenshot({ path: 'nrega_page.png', fullPage: true });
 
     const $ = cheerio.load(content);
     const tables = $('table');
@@ -48,13 +49,13 @@ async function scrapeNregaTable(url) {
       throw new Error(`Expected at least 4 tables on the page, found ${tables.length}`);
     }
 
-    const targetTable = tables.eq(3);  // zero-based index
+    const targetTable = tables.eq(3);
     const rows = targetTable.find('tr');
     const data = [];
 
     rows.each((i, row) => {
       const cols = $(row).find('td');
-      if (cols.length === 0) return; // skip header or empty rows
+      if (cols.length === 0) return; // skip headers or empty rows
 
       const rowData = [];
       cols.each((j, col) => {
@@ -67,19 +68,19 @@ async function scrapeNregaTable(url) {
     return data;
 
   } catch (error) {
-    // Save screenshot for debugging on error
+    // Save screenshot for debugging before closing browser
     await page.screenshot({ path: 'error_screenshot.png', fullPage: true });
     await browser.close();
     throw error;
   }
 }
 
-async function writeToSheet(authClient, spreadsheetId, range, values) {
+async function writeToSheet(authClient, sheetId, range, values) {
   const sheets = google.sheets({ version: 'v4', auth: authClient });
-  const resource = { values };
 
+  const resource = { values };
   const res = await sheets.spreadsheets.values.update({
-    spreadsheetId,
+    spreadsheetId: sheetId,
     range,
     valueInputOption: 'RAW',
     resource,
@@ -91,21 +92,16 @@ async function writeToSheet(authClient, spreadsheetId, range, values) {
 (async () => {
   try {
     console.log('Starting scrape and upload process...');
-    const scrapedData = await scrapeNregaTable(NREGA_URL);
+    const tableData = await scrapeNregaTable(NREGA_URL);
 
-    if (!scrapedData.length) {
-      console.log('No data scraped!');
-      return;
-    }
-
-    console.log(`Scraped ${scrapedData.length} rows.`);
-
+    console.log('Authorizing Google Sheets...');
     const authClient = await authorizeGoogleSheets();
-    await writeToSheet(authClient, SHEET_ID, SHEET_RANGE, scrapedData);
 
-    console.log('Scraping and upload completed successfully.');
+    console.log(`Writing ${tableData.length} rows to Google Sheet...`);
+    await writeToSheet(authClient, SHEET_ID, SHEET_RANGE, tableData);
 
-  } catch (err) {
-    console.error('Error during scraping or upload:', err);
+    console.log('Data written successfully.');
+  } catch (error) {
+    console.error('Error during scraping or upload:', error);
   }
 })();
