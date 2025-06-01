@@ -19,8 +19,9 @@
   },
   "homepage": "https://github.com/irfanqureshi7777/new-repo-name#readme",
   "dependencies": {
-    "axios": "^1.4.0",
-    "cheerio": "^1.0.0-rc.12",
-    "googleapis": "^149.0.0"
-  }
+  "axios": "^1.6.8",
+  "cheerio": "^1.0.0-rc.12",
+  "googleapis": "^133.0.0",
+  "puppeteer": "^21.3.8"
+}
 }
