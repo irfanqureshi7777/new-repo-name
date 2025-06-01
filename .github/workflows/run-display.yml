@@ -1,7 +1,7 @@
 name: Run display.js
 
 on:
-  workflow_dispatch:
+  workflow_dispatch:  # Manual run ke liye trigger
 
 jobs:
   run-labour:
@@ -11,7 +11,13 @@ jobs:
       - name: Code checkout karein
         uses: actions/checkout@v3
         with:
-          submodules: false    # Yeh line add karein
+          submodules: false   # Submodules ko checkout mat karo
+
+      - name: Remove submodule references (optional safeguard)
+        run: |
+          git submodule deinit -f --all || echo "No submodules to deinit"
+          git rm -f --cached Nrega-sheduler || echo "No submodule to remove"
+          git config -f .git/config --remove-section submodule.Nrega-sheduler || echo "No config section"
 
       - name: Node.js setup
         uses: actions/setup-node@v3
