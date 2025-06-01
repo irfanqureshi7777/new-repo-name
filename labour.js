@@ -23,17 +23,26 @@ async function authorizeGoogleSheets() {
 }
 
 async function scrapeNregaTable(url) {
-  const browser = await puppeteer.launch({ headless: true, args: ['--no-sandbox'] });
+  const browser = await puppeteer.launch({
+    headless: 'new',                    // Use new headless mode to avoid warnings
+    args: ['--no-sandbox', '--disable-setuid-sandbox'], // Necessary for CI like GitHub Actions
+    timeout: 0,                        // Disable launch timeout
+  });
+
   const page = await browser.newPage();
 
-  await page.goto(url, { waitUntil: 'networkidle2' });
-  await page.waitForSelector('table');  // Wait for tables to load
+  // Increase page.goto timeout to 60 seconds
+  await page.goto(url, { waitUntil: 'networkidle2', timeout: 60000 });
+
+  // Wait for tables to load
+  await page.waitForSelector('table');
 
   const content = await page.content();
   await browser.close();
 
   const $ = cheerio.load(content);
   const tables = $('table');
+
   if (tables.length < 4) throw new Error('Expected at least 4 tables on page');
 
   const targetTable = tables.eq(3);
