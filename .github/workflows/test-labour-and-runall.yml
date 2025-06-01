@@ -17,7 +17,7 @@ jobs:
           node-version: '18'
 
       - name: 🔐 Decode Google credentials
-        run: echo "${{ secrets.GOOGLE_CREDENTIALS_BASE64 }}" | base64 -d > nrega-scraper.json
+        run: echo "${{ secrets.GOOGLE_CREDENTIALS_BASE64 }}" | base64 -d > Nrega/nrega-scraper.json
 
       - name: 📦 Install dependencies
         working-directory: ./Nrega
