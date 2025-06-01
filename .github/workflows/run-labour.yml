@@ -2,8 +2,8 @@ name: Run labour.js every minute
 
 on:
   schedule:
-    - cron: '* * * * *'     # every 1 minute
-  workflow_dispatch:         # also allow manual trigger
+    - cron: '* * * * *'     # Every 1 minute
+  workflow_dispatch:         # Allow manual trigger
 
 jobs:
   run-labour:
