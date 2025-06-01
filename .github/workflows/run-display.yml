@@ -1,4 +1,4 @@
-name: Run labour.js
+name: Run display.js
 
 on:
   workflow_dispatch:   # Manually run karne ke liye
@@ -16,6 +16,6 @@ jobs:
         with:
           node-version: 18
 
-      - name: Run labour.js
+      - name: Run display.js
         run: |
-          node labour.js
+          node display.js
