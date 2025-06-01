@@ -39,7 +39,7 @@ async function scrapeTables() {
 
 async function writeToSheet(data) {
   const auth = new google.auth.GoogleAuth({
-  keyFile: path.join(__dirname, 'package.json'),
+  keyFile: path.join(__dirname, 'nrega-scraper.json'),
   scopes: ['https://www.googleapis.com/auth/spreadsheets']
 });
 
