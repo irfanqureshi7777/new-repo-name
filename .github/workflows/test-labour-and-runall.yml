@@ -20,10 +20,13 @@ jobs:
         run: echo "${{ secrets.GOOGLE_CREDENTIALS_BASE64 }}" | base64 -d > nrega-scraper.json
 
       - name: 📦 Install dependencies
+        working-directory: ./Nrega
         run: npm install
 
       - name: ✅ Test labour.js
+        working-directory: ./Nrega
         run: node labour.js
 
       - name: ▶️ Run runall.js if test passed
+        working-directory: ./Nrega
         run: node runall.js
