@@ -1,9 +1,10 @@
 {
   "name": "nrega-scraper",
   "version": "1.0.0",
-  "description": "��#\u0000 \u0000M\u0000y\u0000 \u0000N\u0000e\u0000w\u0000 \u0000P\u0000r\u0000o\u0000j\u0000e\u0000c\u0000t\u0000\r\u0000 \u0000",
-  "main": "index.js",
+  "description": "NREGA Scraper Project",
+  "main": "labour.js",
   "scripts": {
+    "start": "node labour.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -16,5 +17,10 @@
   "bugs": {
     "url": "https://github.com/irfanqureshi7777/new-repo-name/issues"
   },
-  "homepage": "https://github.com/irfanqureshi7777/new-repo-name#readme"
+  "homepage": "https://github.com/irfanqureshi7777/new-repo-name#readme",
+  "dependencies": {
+    "axios": "^1.4.0",
+    "cheerio": "^1.0.0-rc.12",
+    "googleapis": "^119.0.0"
+  }
 }
