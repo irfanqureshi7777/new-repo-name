@@ -4,14 +4,11 @@ const { google } = require('googleapis');
 const fs = require('fs');
 
 const SHEET_ID = '1vi-z__fFdVhUZr3PEDjhM83kqhFtbJX0Ejcfu9M8RKo';
-const SHEET_RANGE = 'R6.09!A3';  // Adjust as needed
+const SHEET_RANGE = 'R6.09!A3'; // Your sheet tab name and starting cell
 
 const NREGA_URL = 'https://nreganarep.nic.in/netnrega/dpc_sms_new.aspx?lflag=eng&page=b&Short_Name=MP&state_name=MADHYA+PRADESH&state_code=17&district_name=BALAGHAT&district_code=1738&block_name=KHAIRLANJI&block_code=1738002&fin_year=2025-2026&dt=&EDepartment=ALL&wrkcat=ALL&worktype=ALL&Digest=0Rg9WmyQmiHlGt6U8z1w4A';
 
-// Path to your Google service account JSON credentials file
 const CREDENTIALS_PATH = './credentials.json';
-
-// Google Sheets API scope
 const SCOPES = ['https://www.googleapis.com/auth/spreadsheets'];
 
 async function authorizeGoogleSheets() {
@@ -24,24 +21,21 @@ async function authorizeGoogleSheets() {
 
 async function scrapeNregaTable(url) {
   const browser = await puppeteer.launch({
-    headless: 'new',                      // Use new headless mode
+    headless: 'new',
     args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage'],
   });
 
   const page = await browser.newPage();
-
-  // Set user-agent to reduce bot detection
-  await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0 Safari/537.36');
+  await page.setUserAgent(
+    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0 Safari/537.36'
+  );
 
   try {
     console.log(`Navigating to ${url} ...`);
-    await page.goto(url, { waitUntil: 'networkidle0', timeout: 0 }); // no timeout
-
-    // Wait a bit to ensure full content load
-    await page.waitForTimeout(3000);
+    await page.goto(url, { waitUntil: 'networkidle0', timeout: 0 }); // no timeout limit
+    await page.waitForTimeout(3000); // wait extra 3 sec for full load
 
     const content = await page.content();
-
     const $ = cheerio.load(content);
     const tables = $('table');
 
@@ -66,10 +60,14 @@ async function scrapeNregaTable(url) {
 
     await browser.close();
     return data;
-
   } catch (error) {
-    // Save screenshot for debugging before closing browser
-    await page.screenshot({ path: 'error_screenshot.png', fullPage: true });
+    try {
+      await page.screenshot({ path: 'error_screenshot.png', fullPage: true });
+      console.log('Screenshot saved as error_screenshot.png');
+    } catch (screenshotError) {
+      console.error('Failed to take screenshot:', screenshotError);
+    }
+
     await browser.close();
     throw error;
   }
