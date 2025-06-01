@@ -19,7 +19,7 @@ jobs:
           node-version: 18
 
       - name: Install dependencies
-        run: npm install axios cheerio googleapis
+        run: npm install
 
       - name: Run labour.js
         run: node labour.js
