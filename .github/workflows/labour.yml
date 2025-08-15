@@ -21,8 +21,10 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Create credentials.json from secret
-        run: echo "${{ secrets.GOOGLE_CREDENTIALS_BASE64 }}" | base64 --decode > credentials.json
+      # Change file name to nrega-scraper.json (matches labour.cjs)
+      - name: Create Google credentials file from secret
+        run: echo "${{ secrets.GOOGLE_CREDENTIALS_BASE64 }}" | base64 --decode > nrega-scraper.json
 
+      # Run your new labour.cjs script instead of labour.js
       - name: Run Labour script
-        run: node labour.js
+        run: node labour.cjs
